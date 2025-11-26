@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import List
+
+from pydantic import BaseModel, Field
 
 from app.entities.statistics.category import Category
 
