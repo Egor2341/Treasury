@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from entities.statistics.category import Category
+from models.statistics.category import Category
 
 router = APIRouter(
     prefix="/api/incomes",

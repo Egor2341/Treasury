@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.entities.categories.category import Category
+from app.models.categories.category import Category
 
 
 class ListCategories(BaseModel):

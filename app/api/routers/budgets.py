@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from entities.budgets.edit import Edit
+from models.budgets.edit import Edit
 
 router = APIRouter(
     prefix="/api/budgets",

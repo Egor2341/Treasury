@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from data.models.user import User
-from entities.auth.login import Login
-from entities.auth.register import Register
+from data.entities.user import User
+from models.auth.login import Login
+from models.auth.register import Register
 
 from passlib.context import CryptContext
 
@@ -24,15 +24,15 @@ def add_user(session: AsyncSession, data: Register):
     return new_user
 
 
-async def get_user(session: AsyncSession, data: Login) -> User | None:
+async def get_user(session: AsyncSession, data: Login) -> bool:
     query = select(User).filter_by(email=data.email)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
     if user is None:
-        return None
+        return False
 
     if not verify_password(data.password.get_secret_value(), user.password):
-        return None
+        return False
 
-    return user
+    return True

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from entities.categories.category import Category
-from entities.categories.edit import Edit
+from models.categories.category import Category
+from models.categories.edit import Edit
 
 router = APIRouter(
     prefix="/categories",

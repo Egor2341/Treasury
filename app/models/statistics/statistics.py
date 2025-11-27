@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from app.entities.statistics.category import Category
+from app.models.statistics.category import Category
 
 
 class Statistics(BaseModel):
