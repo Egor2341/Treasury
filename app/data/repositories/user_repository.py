@@ -6,16 +6,17 @@ from models.auth.login import Login
 from models.auth.register import Register
 
 from passlib.context import CryptContext
+from werkzeug.security import generate_password_hash, check_password_hash
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return generate_password_hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return check_password_hash(hashed_password, plain_password)
 
 
 def add_user(session: AsyncSession, data: Register):
@@ -28,7 +29,7 @@ async def get_user(session: AsyncSession, data: Login) -> bool:
     query = select(User).filter_by(email=data.email)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
-
+    print(user)
     if user is None:
         return False
 

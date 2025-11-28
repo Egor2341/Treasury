@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/register", status_code=201)
 async def register(data: Register, session: AsyncSession = Depends(get_session)):
-    user = user_repository.add_user(session, data)
+    user_repository.add_user(session, data)
     try:
         await session.commit()
     except IntegrityError as ex:
@@ -28,7 +28,7 @@ async def register(data: Register, session: AsyncSession = Depends(get_session))
 
 @router.post("/login", status_code=200)
 async def login(data: Login, session: AsyncSession = Depends(get_session)):
-    res = user_repository.get_user(session, data)
+    res = await user_repository.get_user(session, data)
     if res:
         token = create_jwt_token({"sub": data.email})
         return LoginResponse(token=token, token_type="bearer")
