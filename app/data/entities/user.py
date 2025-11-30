@@ -25,6 +25,12 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
+    incomes: Mapped[List["Income"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
 
 from data.entities.category import Category
 from data.entities.expense import Expense
+from data.entities.incomes import Income
