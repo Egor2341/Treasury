@@ -13,7 +13,7 @@ from models.categories.edit import EditDto
 from models.categories.list_categories import ListCategories
 
 
-async def add_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
+async def add_expense(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
     query = select(User).options(selectinload(User.categories)).filter_by(uuid=user_uuid)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
@@ -45,7 +45,7 @@ async def get_categories(session: AsyncSession, user_uuid: str) -> ListCategorie
 
 async def update_category(session: AsyncSession, data: EditDto, user_uuid: uuid):
     if data.old_name == data.new_name:
-        raise DuplicatedEntryError("Old name and new name are the same")
+        raise DuplicatedEntryError("This category already exists")
     await session.execute(
         update(Category)
         .where(

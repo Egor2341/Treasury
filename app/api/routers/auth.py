@@ -9,7 +9,7 @@ from models.auth.login import Login
 from models.auth.login_response import LoginResponse
 from models.auth.register import Register
 from exceptions.DuplicateEntryError import DuplicatedEntryError
-from exceptions.NoUserError import NoUserError
+from exceptions.NoEntryError import NoEntryError
 from services.security import create_jwt_token
 
 router = APIRouter(
@@ -32,7 +32,7 @@ async def register(data: Register, session: AsyncSession = Depends(get_session))
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: AsyncSession = Depends(get_session)):
     user = await user_repository.get_user(session, form_data.username, form_data.password)
     if not user:
-        raise NoUserError("User not exist")
+        raise NoEntryError("User not exist")
 
     token = create_jwt_token({"sub": user.uuid})
-    return LoginResponse(token=token, token_type="bearer")
+    return LoginResponse(access_token=token, token_type="bearer")
