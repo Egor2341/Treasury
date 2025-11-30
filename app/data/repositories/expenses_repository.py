@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from sqlalchemy import select, update, delete
@@ -5,63 +6,61 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from data.entities.category import Category
+from data.entities.expense import Expense
 from data.entities.user import User
 from exceptions.DuplicateEntryError import DuplicatedEntryError
 from exceptions.NoEntryError import NoEntryError
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
-from models.categories.list_categories import ListCategories
+from models.statistics.item import ItemDto
+from models.statistics.list_items import ListItems
+from decimal import Decimal
 
 
-async def add_expense(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
-    query = select(User).options(selectinload(User.categories)).filter_by(uuid=user_uuid)
+
+async def add_expense(session: AsyncSession, data: ItemDto, user_uuid: uuid):
+    query = select(Category).filter_by(user_uuid=user_uuid, name=data.name)
     result = await session.execute(query)
-    user = result.scalar_one_or_none()
+    category = result.scalar_one_or_none()
 
-    if user is None:
-        raise NoEntryError("The user does not exist")
+    if category is None:
+        raise NoEntryError("The category does not exist")
 
-    new_category = Category(name=data.name, type=data.type, user_uuid=user_uuid)
+    cur_date = datetime.datetime.now()
+    new_expense = Expense(user_uuid=user_uuid, name=category.name, value=data.value,
+                          month=cur_date.month, year=cur_date.year)
 
-    if len([cat.name for cat in user.categories if cat.type == data.type and cat.name == data.name]) > 0:
-        raise DuplicatedEntryError("This category already exists")
-
-    session.add(new_category)
+    session.add(new_expense)
 
 
-async def get_categories(session: AsyncSession, user_uuid: str) -> ListCategories:
-    query = select(User).options(selectinload(User.categories)).filter_by(uuid=user_uuid)
+async def get_expenses(session: AsyncSession, user_uuid: str) -> ListItems:
+    query = select(Expense).filter_by(user_uuid=user_uuid)
     result = await session.execute(query)
-    user = result.scalar_one_or_none()
+    expenses = result.scalars().all()
 
-    if user is None:
-        raise NoEntryError("The user does not exist")
-
-    return ListCategories(
-        categories_expenses=[cat.name for cat in user.categories if cat.type == "expenses"],
-        categories_incomes=[cat.name for cat in user.categories if cat.type == "incomes"]
+    return ListItems(
+        total=sum([exp.value for exp in expenses], Decimal(0)),
+        categories=[ItemDto(name=exp.name, value=exp.value) for exp in expenses]
     )
 
 
-async def update_category(session: AsyncSession, data: EditDto, user_uuid: uuid):
-    if data.old_name == data.new_name:
-        raise DuplicatedEntryError("This category already exists")
+async def edit_expense(session: AsyncSession, data: ItemDto, user_uuid: uuid):
+
     await session.execute(
-        update(Category)
+        update(Expense)
         .where(
-            Category.user_uuid == user_uuid,
-            Category.name == data.old_name,
-            Category.type == data.type
+            Expense.user_uuid == user_uuid,
+            Expense.name == data.name
         )
-        .values(name=data.new_name)
+        .values(value=data.value)
     )
 
-async def delete_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
+
+async def delete_expense(session: AsyncSession, name: str, user_uuid: uuid):
     await session.execute(
-        delete(Category)
+        delete(Expense)
         .where(
-            Category.user_uuid == user_uuid,
-            Category.name == data.name,
-            Category.type == data.type
+            Expense.user_uuid == user_uuid,
+            Expense.name == name,
         )
     )

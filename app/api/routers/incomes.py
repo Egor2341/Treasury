@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from models.statistics.category import Category
+from models.statistics.item import ItemDto
 
 router = APIRouter(
     prefix="/api/incomes",
@@ -16,7 +16,7 @@ async def add_incomes():
     pass
 
 @router.patch("", status_code=200)
-async def edit_category(data: Category):
+async def edit_category(data: ItemDto):
     pass
 
 @router.delete("/{title}", status_code=200)

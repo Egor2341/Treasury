@@ -14,15 +14,10 @@ class Category(Base):
     uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     name: Mapped[str] = mapped_column(String(64))
     type: Mapped[str] = mapped_column(String(16))
-    user_uuid: Mapped[int] = mapped_column(ForeignKey("users.uuid"))
+    user_uuid: Mapped[uuid] = mapped_column(ForeignKey("users.uuid"))
 
     user: Mapped["User"] = relationship(back_populates="categories")
 
-    expenses: Mapped[List["Expense"]] = relationship(
-        back_populates="category",
-        cascade="all, delete-orphan"
-    )
 
 
-from data.entities.expense import Expense
 from data.entities.user import User
