@@ -1,6 +1,8 @@
 from fastapi import APIRouter
+from fastapi.params import Depends
 
 from models.statistics.category import Category
+from services.security import get_user_from_token
 
 router = APIRouter(
     prefix="/api/expenses",
@@ -12,7 +14,7 @@ async def get_expenses():
     pass
 
 @router.post("", status_code=201)
-async def add_expences():
+async def add_expenses(current_user: str = Depends(get_user_from_token)):
     pass
 
 @router.patch("", status_code=200)

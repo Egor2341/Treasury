@@ -2,9 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.models.categories.category import Category
-
 
 class ListCategories(BaseModel):
-    categories_expenses: List[Category]
-    categories_theory: List[Category]
+    categories_expenses: List["str"]
+    categories_incomes: List["str"]

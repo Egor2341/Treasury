@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from exceptions.InvalidTokenError import InvalidTokenError
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -24,6 +24,7 @@ def create_jwt_token(data: Dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_user_from_token(token:str = Depends(oauth2_scheme)):
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("sub")
