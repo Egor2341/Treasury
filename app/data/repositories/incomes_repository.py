@@ -13,13 +13,13 @@ from exceptions.DuplicateEntryError import DuplicatedEntryError
 from exceptions.NoEntryError import NoEntryError
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
-from models.statistics.item import ItemDto
+from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
 
 
 
-async def add_income(session: AsyncSession, data: ItemDto, user_uuid: uuid):
+async def add_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
     query = select(Category).filter_by(user_uuid=user_uuid, name=data.name)
     result = await session.execute(query)
     category = result.scalar_one_or_none()
@@ -41,11 +41,11 @@ async def get_incomes(session: AsyncSession, user_uuid: str) -> ListItems:
 
     return ListItems(
         total=sum([inc.value for inc in incomes], Decimal(0)),
-        categories=[ItemDto(name=inc.name, value=inc.value) for inc in incomes]
+        categories=[ItemResponseDto(name=inc.name, value=inc.value) for inc in incomes]
     )
 
 
-async def edit_income(session: AsyncSession, data: ItemDto, user_uuid: uuid):
+async def edit_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
 
     await session.execute(
         update(Income)

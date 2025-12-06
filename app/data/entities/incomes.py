@@ -9,7 +9,7 @@ from decimal import Decimal
 
 
 class Income(Base):
-    __tablename__ = "expenses"
+    __tablename__ = "incomes"
 
     uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     user_uuid: Mapped[uuid] = mapped_column(ForeignKey("users.uuid"))

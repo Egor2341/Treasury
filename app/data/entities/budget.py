@@ -18,7 +18,7 @@ class Budget(Base):
     year: Mapped[int] = mapped_column(Integer)
     value: Mapped[Decimal] = mapped_column(DECIMAL(10, 2))
 
-    user: Mapped["User"] = relationship(back_populates="expenses")
+    user: Mapped["User"] = relationship(back_populates="budgets")
 
 
 from data.entities.user import User

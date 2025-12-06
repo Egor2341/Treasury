@@ -8,7 +8,7 @@ from models.categories.edit import EditDto
 from services.security import get_user_from_token
 
 router = APIRouter(
-    prefix="/categories",
+    prefix="/api/categories",
     tags=["categories"]
 )
 
@@ -39,10 +39,11 @@ async def edit_category(
 
 @router.delete("", status_code=200)
 async def delete_category(
-        data: CategoryDto,
+        name: str,
+        type: str,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
 ):
-    await category_repository.delete_category(session, data, current_user_uuid)
+    await category_repository.delete_category(session, CategoryDto(name=name, type=type), current_user_uuid)
     await session.commit()
 

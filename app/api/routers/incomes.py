@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from data.init_bd import get_session
 from data.repositories import incomes_repository
-from models.statistics.item import ItemDto
+from models.statistics.item import ItemResponseDto
 from services.security import get_user_from_token
 
 router = APIRouter(
@@ -21,7 +21,7 @@ async def get_expenses(
 
 @router.post("", status_code=201)
 async def add_expenses(
-        data: ItemDto,
+        data: ItemResponseDto,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
 
@@ -32,7 +32,7 @@ async def add_expenses(
 
 @router.patch("", status_code=200)
 async def edit_category(
-        data: ItemDto,
+        data: ItemResponseDto,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
 ):

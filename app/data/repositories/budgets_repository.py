@@ -15,7 +15,7 @@ from models.budgets.budget import BudgetDto
 from models.budgets.list_budgets import ListBudgets
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
-from models.statistics.item import ItemDto
+from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
 

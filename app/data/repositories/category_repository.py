@@ -38,8 +38,8 @@ async def get_categories(session: AsyncSession, user_uuid: str) -> ListCategorie
         raise NoEntryError("The user does not exist")
 
     return ListCategories(
-        categories_expenses=[cat.name for cat in user.categories if cat.type == "expenses"],
-        categories_incomes=[cat.name for cat in user.categories if cat.type == "incomes"]
+        expenses=[cat.name for cat in user.categories if cat.type == "expenses"],
+        incomes=[cat.name for cat in user.categories if cat.type == "incomes"]
     )
 
 

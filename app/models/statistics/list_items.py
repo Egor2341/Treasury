@@ -3,9 +3,9 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from models.statistics.item import ItemDto
+from models.statistics.item import ItemResponseDto
 
 
 class ListItems(BaseModel):
     total: Decimal = Field(..., ge=0)
-    categories: List["ItemDto"]
+    items: List["ItemResponseDto"]

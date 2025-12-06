@@ -37,4 +37,14 @@ async def get_user(session: AsyncSession, email: str, password: str) -> User | N
 
     return user
 
+async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
+    query = select(User).filter_by(uuid=uuid)
+    result = await session.execute(query)
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        return None
+
+    return user
+
 

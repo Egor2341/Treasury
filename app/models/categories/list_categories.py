@@ -4,5 +4,5 @@ from pydantic import BaseModel
 
 
 class ListCategories(BaseModel):
-    categories_expenses: List["str"]
-    categories_incomes: List["str"]
+    expenses: List["str"]
+    incomes: List["str"]
