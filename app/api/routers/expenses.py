@@ -43,7 +43,7 @@ async def edit_category(
 
 
 @router.delete("", status_code=200)
-async def delete_categoty(
+async def delete_category(
         title: str,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)

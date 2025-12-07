@@ -6,6 +6,6 @@ from pydantic import BaseModel, Field
 
 class BudgetDto(BaseModel):
     type: str
-    month: int
+    month: str
     year: int
-    value: Decimal = Field(..., ge=0)
+    value: Decimal = Field(...)

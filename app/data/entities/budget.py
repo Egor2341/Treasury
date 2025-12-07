@@ -14,7 +14,7 @@ class Budget(Base):
     uuid: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     user_uuid: Mapped[uuid] = mapped_column(ForeignKey("users.uuid"))
     type: Mapped[str] = mapped_column(String(16))
-    month: Mapped[int] = mapped_column(Integer)
+    month: Mapped[str] = mapped_column(String(16))
     year: Mapped[int] = mapped_column(Integer)
     value: Mapped[Decimal] = mapped_column(DECIMAL(10, 2))
 

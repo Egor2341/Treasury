@@ -17,6 +17,7 @@ from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
 
+from models.statistics.search import SearchResultDto
 
 
 async def add_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
@@ -41,7 +42,7 @@ async def get_incomes(session: AsyncSession, user_uuid: str) -> ListItems:
 
     return ListItems(
         total=sum([inc.value for inc in incomes], Decimal(0)),
-        categories=[ItemResponseDto(name=inc.name, value=inc.value) for inc in incomes]
+        items=[ItemResponseDto(name=inc.name, value=inc.value) for inc in incomes]
     )
 
 
@@ -65,3 +66,35 @@ async def delete_income(session: AsyncSession, name: str, user_uuid: uuid):
             Income.name == name,
         )
     )
+
+async def search_income(title: str,
+                         year: int,
+                         month: str,
+                         user_uuid: uuid,
+                         session: AsyncSession,
+                         ):
+    if (month == "Все"):
+        query = select(Income).filter_by(
+            user_uuid=user_uuid,
+            name=title,
+            year=year,
+        )
+    else:
+        query = select(Income).filter_by(
+            user_uuid=user_uuid,
+            name=title,
+            year=year,
+            month=monthToInt(month)
+        )
+    result = await session.execute(query)
+    incomes = result.scalars().all()
+
+    return SearchResultDto(value=sum([inc.value for inc in incomes], Decimal(0)))
+
+
+def monthToInt(month: str):
+    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+              "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+
+    months_dict = {month: i + 1 for i, month in enumerate(months)}
+    return months_dict[month]

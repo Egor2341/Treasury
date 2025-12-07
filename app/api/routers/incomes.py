@@ -11,6 +11,7 @@ router = APIRouter(
     tags=["incomes"]
 )
 
+
 @router.get("", status_code=200)
 async def get_expenses(
         current_user_uuid: str = Depends(get_user_from_token),
@@ -40,8 +41,8 @@ async def edit_category(
     await session.commit()
 
 
-@router.delete("/{title}", status_code=200)
-async def delete_categoty(
+@router.delete("", status_code=200)
+async def delete_category(
         title: str,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
@@ -49,6 +50,8 @@ async def delete_categoty(
     await incomes_repository.delete_income(session, title, current_user_uuid)
     await session.commit()
 
-# @router.get("/search", status_code=200)
-# async def search(title: str, year: int, month: str):
-#     pass
+
+@router.get("/search", status_code=200)
+async def search(title: str, year: int, month: str, current_user_uuid: str = Depends(get_user_from_token),
+                 session: AsyncSession = Depends(get_session)):
+    return await incomes_repository.search_income(title, year, month, current_user_uuid, session)
