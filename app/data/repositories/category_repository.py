@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 

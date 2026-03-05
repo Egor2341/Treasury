@@ -1,5 +1,3 @@
-import asyncio
-
 import typer
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,16 +7,17 @@ from api.routers.budgets import router as budgets_router
 from api.routers.categories import router as categories_router
 from api.routers.expenses import router as expenses_router
 from api.routers.incomes import router as incomes_router
-from data.init_bd import init_models
-import os
+from api.routers.roles import router as roles_router
 from dotenv import load_dotenv
 load_dotenv()
+
+
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vite dev сервер
+        "http://localhost:5173",
         "http://127.0.0.1:5173"
     ],
     allow_credentials=True,
@@ -31,13 +30,13 @@ app.include_router(budgets_router)
 app.include_router(categories_router)
 app.include_router(expenses_router)
 app.include_router(incomes_router)
+app.include_router(roles_router)
 
 cli = typer.Typer()
 
 
 @cli.command()
 def db_init_models():
-    asyncio.run(init_models())
     print("Done")
 
 

@@ -1,12 +1,18 @@
 import uuid
 from typing import List
 
-from sqlalchemy import String
+from sqlalchemy import String, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column
 
 from data.init_bd import Base
 
+association_table = Table(
+    "user_roles",
+    Base.metadata,
+    Column("user_id", ForeignKey("users.uuid")),
+    Column("role_id", ForeignKey("roles.uuid")),
+)
 
 class User(Base):
     __tablename__ = "users"
@@ -15,9 +21,12 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(128), unique=True)
     password: Mapped[str] = mapped_column(String(164))
 
+    roles: Mapped[List["Role"]] = relationship(secondary=association_table)
+
+
     categories: Mapped[List["Category"]] = relationship(
         back_populates="user",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan, delete"
     )
 
     expenses: Mapped[List["Expense"]] = relationship(
@@ -40,4 +49,4 @@ from data.entities.category import Category
 from data.entities.expense import Expense
 from data.entities.incomes import Income
 from data.entities.budget import Budget
-
+from data.entities.role import Role

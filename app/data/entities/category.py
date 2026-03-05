@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy import String, ForeignKey

@@ -1,8 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from data.entities.role import Role
 from data.entities.user import User
-from models.auth.login import Login
+from exceptions.NoEntryError import NoEntryError
 from models.auth.register import Register
 
 from passlib.context import CryptContext
@@ -21,11 +23,17 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 async def add_user(session: AsyncSession, data: Register):
     new_user = User(email=data.email, password=hash_password(data.password.get_secret_value()))
+    query = select(Role).filter_by(name="user")
+    result = await session.execute(query)
+    role = result.scalar_one_or_none()
+    if role is None:
+        raise NoEntryError("The role does not exist")
+    new_user.roles.append(role)
     session.add(new_user)
 
 
 async def get_user(session: AsyncSession, email: str, password: str) -> User | None:
-    query = select(User).filter_by(email=email)
+    query = select(User).options(selectinload(User.roles)).filter_by(email=email)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
@@ -37,6 +45,7 @@ async def get_user(session: AsyncSession, email: str, password: str) -> User | N
 
     return user
 
+
 async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
     query = select(User).filter_by(uuid=uuid)
     result = await session.execute(query)
@@ -46,5 +55,3 @@ async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
         return None
 
     return user
-
-

@@ -35,7 +35,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Async
     if not user:
         raise NoEntryError("User not exist")
 
-    access_token = create_access_token({"sub": user.uuid})
+
+    access_token = create_access_token({"sub": user.uuid, "roles": [r.name for r in user.roles]})
     refresh_token = create_refresh_token({"sub": user.uuid})
     return AuthResponse(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
