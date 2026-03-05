@@ -1,17 +1,12 @@
 import datetime
 import os
-from typing import Dict, Annotated, List, Any
+from typing import Dict, Annotated, Any
 
 import jwt
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from data.entities.user import User
-from data.init_bd import get_session
-from data.repositories.user_repository import get_user_by_uuid
 from exceptions.InvalidTokenError import InvalidTokenError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -19,7 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 5
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 

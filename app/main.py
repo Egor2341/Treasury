@@ -8,6 +8,7 @@ from api.routers.categories import router as categories_router
 from api.routers.expenses import router as expenses_router
 from api.routers.incomes import router as incomes_router
 from api.routers.roles import router as roles_router
+from api.routers.admin import router as admin_router
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -31,6 +32,7 @@ app.include_router(categories_router)
 app.include_router(expenses_router)
 app.include_router(incomes_router)
 app.include_router(roles_router)
+app.include_router(admin_router)
 
 cli = typer.Typer()
 

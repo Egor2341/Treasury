@@ -47,5 +47,5 @@ async def refresh_token(request: RefreshTokenRequest, session: AsyncSession = De
     if not user:
         raise NoEntryError("User not exist")
 
-    access_token = create_access_token({"sub": user.uuid})
+    access_token = create_access_token({"sub": user.uuid, "roles": [r.name for r in user.roles]})
     return AuthResponse(access_token=access_token, refresh_token=request.refresh_token, token_type="bearer")
