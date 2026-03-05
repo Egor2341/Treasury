@@ -33,13 +33,13 @@ async def delete_admin(
 
 @router.get("/users", status_code=200)
 async def get_users(
-        _: Annotated[str, Depends(RoleChecker(allowed_roles=["admin"]))],
+        current_user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["admin"]))],
         session: AsyncSession = Depends(get_session)
 ):
-    return await user_repository.get_users(session)
+    return await user_repository.get_users(session, current_user_uuid)
 
 @router.get("/stat", status_code=200)
-async def search(type_data: str,
+async def get_stat(type_data: str,
                  type_value: str,
                  year: int,
                  month: str,

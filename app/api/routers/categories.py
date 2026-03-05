@@ -32,10 +32,10 @@ async def new_category(
     await session.commit()
 
 
-@router.patch("", status_code=200)
+@router.patch("", status_code=20)
 async def edit_category(
         data: EditDto,
-        current_user_uuid: str = Depends(get_user_from_token),
+        current_user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
         session: AsyncSession = Depends(get_session)
 ):
     await category_repository.update_category(session, data, current_user_uuid)
@@ -46,7 +46,7 @@ async def edit_category(
 async def delete_category(
         name: str,
         type: str,
-        current_user_uuid: str = Depends(get_user_from_token),
+        current_user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
         session: AsyncSession = Depends(get_session)
 ):
     await category_repository.delete_category(session, CategoryDto(name=name, type=type), current_user_uuid)

@@ -23,7 +23,7 @@ async def add_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid
 
     new_category = Category(name=data.name, type=data.type, user_uuid=user_uuid)
 
-    if len([cat.name for cat in user.categories if cat.type == data.type and cat.name == data.name]) > 0:
+    if len([cat.name for cat in user.categories if cat.name == data.name]) > 0:
         raise DuplicatedEntryError("This category already exists")
 
     session.add(new_category)

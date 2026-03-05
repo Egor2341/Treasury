@@ -53,7 +53,7 @@ async def get_user(session: AsyncSession, email: str, password: str) -> User | N
 
 
 async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
-    query = select(User).filter_by(uuid=uuid)
+    query = select(User).options(selectinload(User.roles)).filter_by(uuid=uuid)
     result = await session.execute(query)
     user = result.scalar_one_or_none()
 
@@ -63,7 +63,7 @@ async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
     return user
 
 
-async def get_users(session: AsyncSession, limit: int = 10, offset: int = 0) -> List[UserInfo]:
+async def get_users(session: AsyncSession, user_uuid: str, limit: int = 10, offset: int = 0) -> List[UserInfo]:
     stmt = (
         select(User)
         .options(selectinload(User.roles))
@@ -76,7 +76,7 @@ async def get_users(session: AsyncSession, limit: int = 10, offset: int = 0) -> 
 
     mapped_users = []
     for user in users:
-        if user.email != "admin@treasury.com":
+        if user.email != "admin@treasury.com" and user.uuid != user_uuid:
             mapped_users.append(UserInfo(email=user.email, roles=[r.name for r in user.roles]))
 
     return mapped_users
@@ -135,7 +135,7 @@ async def get_statistics(session: AsyncSession, type_data: str, type_value: str,
         values = [[i.value for i in user[0].incomes if i.year == year] for user in users] if month == "Все" else [
             [i.value for i in user[0].incomes if (i.year == year and i.month == month_to_int(month))] for user in users]
 
-    if type_value == "total":
+    if type_value == "Сумма":
         value = sum([sum(v, Decimal(0)) for v in values], Decimal(0))
     else:
         value = sum([sum(v, Decimal(0)) for v in values], Decimal(0)) / len(values)

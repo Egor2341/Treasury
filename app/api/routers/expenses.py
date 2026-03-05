@@ -33,7 +33,7 @@ async def add_expenses(
 
 
 @router.patch("", status_code=200)
-async def edit_category(
+async def edit_expense(
         data: ItemResponseDto,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
@@ -43,7 +43,7 @@ async def edit_category(
 
 
 @router.delete("", status_code=200)
-async def delete_category(
+async def delete_expense(
         title: str,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)
