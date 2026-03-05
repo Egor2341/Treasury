@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List
 
 from sqlalchemy import select
@@ -7,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from data.entities.role import Role
 from data.entities.user import User
 from exceptions.NoEntryError import NoEntryError
+from models.admin.statistics import Stat
 from models.admin.user_info import UserInfo
 from models.auth.register import Register
 
@@ -80,7 +82,6 @@ async def get_users(session: AsyncSession, limit: int = 10, offset: int = 0) -> 
     return mapped_users
 
 
-
 async def add_admin(session: AsyncSession, email: str) -> None:
     query = select(User).options(selectinload(User.roles)).filter_by(email=email)
     result = await session.execute(query)
@@ -117,3 +118,34 @@ async def delete_admin(session: AsyncSession, email: str) -> None:
         if roles[i].name == "admin":
             roles.pop(i)
             break
+
+
+async def get_statistics(session: AsyncSession, type_data: str, type_value: str, year: int, month: str) -> Stat:
+    stmt = select(User).options(selectinload(User.expenses)) if type_data == "e" else select(User).options(
+        selectinload(User.incomes))
+    res = await session.execute(stmt)
+
+    users = res.all()
+
+    if type_data == "e":
+        values = [[e.value for e in user[0].expenses if e.year == year] for user in users] if month == "Все" else [
+            [e.value for e in user[0].expenses if (e.year == year and e.month == month_to_int(month))] for user in
+            users]
+    else:
+        values = [[i.value for i in user[0].incomes if i.year == year] for user in users] if month == "Все" else [
+            [i.value for i in user[0].incomes if (i.year == year and i.month == month_to_int(month))] for user in users]
+
+    if type_value == "total":
+        value = sum([sum(v, Decimal(0)) for v in values], Decimal(0))
+    else:
+        value = sum([sum(v, Decimal(0)) for v in values], Decimal(0)) / len(values)
+
+    return Stat(count=len(values), value=value)
+
+
+def month_to_int(month: str):
+    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+              "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+
+    months_dict = {month: i + 1 for i, month in enumerate(months)}
+    return months_dict[month]

@@ -38,3 +38,13 @@ async def get_users(
 ):
     return await user_repository.get_users(session)
 
+@router.get("/stat", status_code=200)
+async def search(type_data: str,
+                 type_value: str,
+                 year: int,
+                 month: str,
+                 _: Annotated[str, Depends(RoleChecker(allowed_roles=["admin"]))],
+                 session: AsyncSession = Depends(get_session)
+):
+    return await user_repository.get_statistics(session, type_data, type_value, year, month)
+
