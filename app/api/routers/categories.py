@@ -7,7 +7,7 @@ from data.init_bd import get_session
 from data.repositories import category_repository
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
-from services.security import get_user_from_token, RoleChecker
+from services.security import RoleChecker
 
 router = APIRouter(
     prefix="/api/categories",
@@ -16,11 +16,40 @@ router = APIRouter(
 
 
 @router.get("", status_code=200)
-async def get_categories(
+async def get_all_categories(
         current_user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
-        session: AsyncSession = Depends(get_session)
+        session: AsyncSession = Depends(get_session),
+        page_e: int = 0,
+        page_i: int = 0,
+        order_e: bool = True,
+        order_i: bool = True
 ):
-    return await category_repository.get_categories(session, current_user_uuid)
+    return await category_repository.get_all_categories(
+        session,
+        current_user_uuid,
+        page_e,
+        page_i,
+        order_e,
+        order_i
+    )
+
+
+@router.get("/one_type", status_code=200)
+async def get_one_type_categories(
+        type: str,
+        current_user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
+        session: AsyncSession = Depends(get_session),
+        page: int = 0,
+        order: bool = True
+):
+    return await category_repository.get_one_type_categories(
+        session,
+        current_user_uuid,
+        type,
+        page,
+        order
+    )
+
 
 @router.post("", status_code=201)
 async def new_category(

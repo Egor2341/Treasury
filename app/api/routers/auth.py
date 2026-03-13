@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from data.init_bd import get_session
 from data.repositories import user_repository
-from models.auth.login import Login
 from models.auth.login_response import AuthResponse
 from models.auth.refresh_token import RefreshTokenRequest
 from models.auth.register import Register

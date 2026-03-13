@@ -16,9 +16,16 @@ router = APIRouter(
 @router.get("", status_code=200)
 async def get_expenses(
         current_user_uuid: str = Depends(get_user_from_token),
-        session: AsyncSession = Depends(get_session)
+        session: AsyncSession = Depends(get_session),
+        page: int = 0,
+        order_value: bool = True
 ):
-    return await expenses_repository.get_expenses(session, current_user_uuid)
+    return await expenses_repository.get_expenses(
+        session,
+        current_user_uuid,
+        page,
+        order_value
+    )
 
 
 @router.post("", status_code=201)
@@ -58,5 +65,5 @@ async def search(title: str,
                  month: str,
                  current_user_uuid: str = Depends(get_user_from_token),
                  session: AsyncSession = Depends(get_session)
-):
+                 ):
     return await expenses_repository.search_expense(title, year, month, current_user_uuid, session)

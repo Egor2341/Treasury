@@ -5,12 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from data.entities.category import Category
+from data.entities.expense import Expense
+from data.entities.incomes import Income
 from data.entities.user import User
 from exceptions.DuplicateEntryError import DuplicatedEntryError
 from exceptions.NoEntryError import NoEntryError
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
 from models.categories.list_categories import ListCategories
+from models.categories.list_one_type_categories import ListOneTypeCategories
+
+LIMIT = 5
 
 
 async def add_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
@@ -55,6 +60,42 @@ async def update_category(session: AsyncSession, data: EditDto, user_uuid: uuid)
         )
         .values(name=data.new_name)
     )
+
+
+async def get_all_categories(session: AsyncSession,
+                             user_uuid: str,
+                             page_e: int,
+                             page_i: int,
+                             order_e: bool,
+                             order_i: bool
+                             ) -> ListCategories:
+    expenses = await get_one_type_categories(session, user_uuid, "e", page_e, order_e)
+    incomes = await get_one_type_categories(session, user_uuid, "i", page_i, order_i)
+
+    return ListCategories(
+        expenses=expenses.categories,
+        incomes=incomes.categories
+    )
+
+
+async def get_one_type_categories(session: AsyncSession,
+                                  user_uuid: str,
+                                  type: str,
+                                  page,
+                                  order
+                                  ) -> ListOneTypeCategories:
+    type = Expense if type == "e" else Income
+    stmt = select(type)
+    stmt = stmt.order_by(type.name) if order else stmt.order_by(type.name.desc())
+    stmt = stmt.where(type.user_uuid == user_uuid).limit(LIMIT).offset(page * LIMIT)
+
+    result = await session.execute(stmt)
+    categories = result.scalars().all()
+
+    return ListOneTypeCategories(
+        categories=[cat.name for cat in categories]
+    )
+
 
 async def delete_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid):
     await session.execute(

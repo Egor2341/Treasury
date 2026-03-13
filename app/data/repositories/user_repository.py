@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from data.entities.role import Role
 from data.entities.user import User
+from data.repositories.sup_funcs import month_to_int
 from exceptions.NoEntryError import NoEntryError
 from models.admin.statistics import Stat
 from models.admin.user_info import UserInfo
@@ -15,6 +16,8 @@ from models.auth.register import Register
 from passlib.context import CryptContext
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi import HTTPException, status
+
+LIMIT = 10
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -63,12 +66,14 @@ async def get_user_by_uuid(session: AsyncSession, uuid: str) -> User | None:
     return user
 
 
-async def get_users(session: AsyncSession, user_uuid: str, limit: int = 10, offset: int = 0) -> List[UserInfo]:
+async def get_users(session: AsyncSession,
+                    user_uuid: str,
+                    page: int) -> List[UserInfo]:
     stmt = (
         select(User)
         .options(selectinload(User.roles))
-        .limit(limit)
-        .offset(offset)
+        .limit(LIMIT)
+        .offset(LIMIT * page)
     )
 
     result = await session.execute(stmt)
@@ -143,9 +148,3 @@ async def get_statistics(session: AsyncSession, type_data: str, type_value: str,
     return Stat(count=len(values), value=value)
 
 
-def month_to_int(month: str):
-    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-              "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-
-    months_dict = {month: i + 1 for i, month in enumerate(months)}
-    return months_dict[month]

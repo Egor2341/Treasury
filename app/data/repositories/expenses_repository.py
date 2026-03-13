@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from data.entities.category import Category
 from data.entities.expense import Expense
+from data.repositories.sup_funcs import month_to_int
 from exceptions.DuplicateEntryError import DuplicatedEntryError
 from exceptions.NoEntryError import NoEntryError
 from models.statistics.item import ItemResponseDto
@@ -13,6 +14,8 @@ from models.statistics.list_items import ListItems
 from decimal import Decimal
 
 from models.statistics.search import SearchResultDto
+
+LIMIT = 7
 
 
 async def add_expense(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
@@ -36,9 +39,16 @@ async def add_expense(session: AsyncSession, data: ItemResponseDto, user_uuid: u
         raise DuplicatedEntryError("This expense already exist")
 
 
-async def get_expenses(session: AsyncSession, user_uuid: str) -> ListItems:
-    query = select(Expense).filter_by(user_uuid=user_uuid)
-    result = await session.execute(query)
+async def get_expenses(
+        session: AsyncSession,
+        user_uuid: str,
+        page,
+        order_value: bool
+) -> ListItems:
+    stmt = select(Expense).filter_by(user_uuid=user_uuid)
+    stmt = stmt.order_by(Expense.value) if order_value else stmt.order_by(Expense.value.desc())
+    stmt = stmt.limit(LIMIT).offset(LIMIT * page)
+    result = await session.execute(stmt)
     expenses = result.scalars().all()
 
     return ListItems(
@@ -74,7 +84,7 @@ async def search_expense(title: str,
                          user_uuid: uuid,
                          session: AsyncSession,
                          ):
-    if (month == "Все"):
+    if month == "Все":
         query = select(Expense).filter_by(
             user_uuid=user_uuid,
             name=title,
@@ -85,17 +95,9 @@ async def search_expense(title: str,
             user_uuid=user_uuid,
             name=title,
             year=year,
-            month=monthToInt(month)
+            month=month_to_int(month)
         )
     result = await session.execute(query)
     expenses = result.scalars().all()
 
     return SearchResultDto(value=sum([exp.value for exp in expenses], Decimal(0)))
-
-
-def monthToInt(month: str):
-    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-              "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-
-    months_dict = {month: i + 1 for i, month in enumerate(months)}
-    return months_dict[month]

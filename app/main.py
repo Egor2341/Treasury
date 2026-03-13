@@ -10,6 +10,7 @@ from api.routers.incomes import router as incomes_router
 from api.routers.roles import router as roles_router
 from api.routers.admin import router as admin_router
 from dotenv import load_dotenv
+
 load_dotenv()
 
 

@@ -3,21 +3,18 @@ import uuid
 
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from data.entities.category import Category
-from data.entities.expense import Expense
 from data.entities.incomes import Income
-from data.entities.user import User
-from exceptions.DuplicateEntryError import DuplicatedEntryError
+from data.repositories.sup_funcs import month_to_int
 from exceptions.NoEntryError import NoEntryError
-from models.categories.category import CategoryDto
-from models.categories.edit import EditDto
 from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
 
 from models.statistics.search import SearchResultDto
+
+LIMIT = 7
 
 
 async def add_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
@@ -30,14 +27,21 @@ async def add_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uu
 
     cur_date = datetime.datetime.now()
     new_income = Income(user_uuid=user_uuid, name=category.name, value=data.value,
-                          month=cur_date.month, year=cur_date.year)
+                        month=cur_date.month, year=cur_date.year)
 
     session.add(new_income)
 
 
-async def get_incomes(session: AsyncSession, user_uuid: str) -> ListItems:
-    query = select(Income).filter_by(user_uuid=user_uuid)
-    result = await session.execute(query)
+async def get_incomes(
+        session: AsyncSession,
+        user_uuid: str,
+        page: int,
+        order_value: bool
+) -> ListItems:
+    stmt = select(Income).filter_by(user_uuid=user_uuid)
+    stmt = stmt.order_by(Income.value) if order_value else stmt.order_by(Income.value.desc())
+    stmt = stmt.limit(LIMIT).offset(LIMIT * page)
+    result = await session.execute(stmt)
     incomes = result.scalars().all()
 
     return ListItems(
@@ -47,7 +51,6 @@ async def get_incomes(session: AsyncSession, user_uuid: str) -> ListItems:
 
 
 async def edit_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
-
     await session.execute(
         update(Income)
         .where(
@@ -67,12 +70,13 @@ async def delete_income(session: AsyncSession, name: str, user_uuid: uuid):
         )
     )
 
+
 async def search_income(title: str,
-                         year: int,
-                         month: str,
-                         user_uuid: uuid,
-                         session: AsyncSession,
-                         ):
+                        year: int,
+                        month: str,
+                        user_uuid: uuid,
+                        session: AsyncSession,
+                        ):
     if (month == "Все"):
         query = select(Income).filter_by(
             user_uuid=user_uuid,
@@ -84,17 +88,9 @@ async def search_income(title: str,
             user_uuid=user_uuid,
             name=title,
             year=year,
-            month=monthToInt(month)
+            month=month_to_int(month)
         )
     result = await session.execute(query)
     incomes = result.scalars().all()
 
     return SearchResultDto(value=sum([inc.value for inc in incomes], Decimal(0)))
-
-
-def monthToInt(month: str):
-    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-              "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-
-    months_dict = {month: i + 1 for i, month in enumerate(months)}
-    return months_dict[month]
