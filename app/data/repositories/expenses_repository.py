@@ -9,6 +9,7 @@ from data.entities.expense import Expense
 from data.repositories.sup_funcs import month_to_int
 from exceptions.DuplicateEntryError import DuplicatedEntryError
 from exceptions.NoEntryError import NoEntryError
+from models.statistics.categories import Categories
 from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
@@ -42,11 +43,11 @@ async def add_expense(session: AsyncSession, data: ItemResponseDto, user_uuid: u
 async def get_expenses(
         session: AsyncSession,
         user_uuid: str,
-        page,
-        order_value: bool
+        page: int,
+        order: bool
 ) -> ListItems:
     stmt = select(Expense).filter_by(user_uuid=user_uuid)
-    stmt = stmt.order_by(Expense.value) if order_value else stmt.order_by(Expense.value.desc())
+    stmt = stmt.order_by(Expense.value) if order else stmt.order_by(Expense.value.desc())
     stmt = stmt.limit(LIMIT).offset(LIMIT * page)
     result = await session.execute(stmt)
     expenses = result.scalars().all()
@@ -54,6 +55,18 @@ async def get_expenses(
     return ListItems(
         total=sum([exp.value for exp in expenses], Decimal(0)),
         items=[ItemResponseDto(name=exp.name, value=exp.value) for exp in expenses]
+    )
+
+
+async def get_categories(
+        session: AsyncSession,
+        user_uuid: str
+) -> Categories:
+    dbdata = await session.execute(
+        select(Category.name).order_by(Category.name).where(Category.user_uuid == user_uuid,
+                                                            Category.type == "expenses"))
+    return Categories(
+        categories=list(dbdata.scalars().all())
     )
 
 

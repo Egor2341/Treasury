@@ -8,6 +8,7 @@ from data.entities.category import Category
 from data.entities.incomes import Income
 from data.repositories.sup_funcs import month_to_int
 from exceptions.NoEntryError import NoEntryError
+from models.statistics.categories import Categories
 from models.statistics.item import ItemResponseDto
 from models.statistics.list_items import ListItems
 from decimal import Decimal
@@ -49,6 +50,17 @@ async def get_incomes(
         items=[ItemResponseDto(name=inc.name, value=inc.value) for inc in incomes]
     )
 
+
+async def get_categories(
+        session: AsyncSession,
+        user_uuid: str
+) -> Categories:
+    dbdata = await session.execute(
+        select(Category.name).order_by(Category.name).where(Category.user_uuid == user_uuid,
+                                                            Category.type == "incomes"))
+    return Categories(
+        categories=list(dbdata.scalars().all())
+    )
 
 async def edit_income(session: AsyncSession, data: ItemResponseDto, user_uuid: uuid):
     await session.execute(

@@ -1,10 +1,12 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from data.init_bd import get_session
 from data.repositories import incomes_repository
 from models.statistics.item import ItemResponseDto
-from services.security import get_user_from_token
+from services.security import get_user_from_token, RoleChecker
 
 router = APIRouter(
     prefix="/api/incomes",
@@ -26,6 +28,13 @@ async def get_expenses(
         order_value
     )
 
+
+@router.get("/categories", status_code=200)
+async def get_categories(
+        user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
+        session: AsyncSession = Depends(get_session)
+):
+    return await incomes_repository.get_categories(session, user_uuid)
 
 @router.post("", status_code=201)
 async def add_expenses(
