@@ -10,6 +10,7 @@ from data.entities.category import *
 from data.entities.expense import *
 from data.entities.incomes import *
 from data.entities.role import *
+from data.entities.receipt import *
 
 from alembic import context
 

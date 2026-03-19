@@ -26,13 +26,12 @@ async def add_category(session: AsyncSession, data: CategoryDto, user_uuid: uuid
     if user is None:
         raise NoEntryError("The user does not exist")
 
-    new_category = Category(name=data.name, type=data.type, user_uuid=user_uuid)
-
     if len([cat.name for cat in user.categories if cat.name == data.name]) > 0:
         raise DuplicatedEntryError("This category already exists")
 
-    session.add(new_category)
+    new_category = Category(name=data.name, type=data.type, user_uuid=user_uuid)
 
+    session.add(new_category)
 
 
 async def update_category(session: AsyncSession, data: EditDto):
@@ -70,7 +69,6 @@ async def get_all_categories(session: AsyncSession,
                 incomes["name"].append(c.name)
                 incomes["uuid"].append(c.uuid)
             incomes["count"] += 1
-
 
     return ListCategories(
         expenses=expenses["name"],
@@ -119,4 +117,3 @@ async def delete_category(session: AsyncSession, uuid, user_uuid: uuid):
         delete(Category)
         .where(Category.uuid == uuid)
     )
-

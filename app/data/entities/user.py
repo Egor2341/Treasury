@@ -29,6 +29,11 @@ class User(Base):
         cascade="all, delete-orphan, delete"
     )
 
+    receipts: Mapped[List["Receipt"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan, delete"
+    )
+
     expenses: Mapped[List["Expense"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
@@ -50,3 +55,4 @@ from data.entities.expense import Expense
 from data.entities.incomes import Income
 from data.entities.budget import Budget
 from data.entities.role import Role
+from data.entities.receipt import Receipt

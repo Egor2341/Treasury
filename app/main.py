@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 import typer
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,13 +11,19 @@ from api.routers.expenses import router as expenses_router
 from api.routers.incomes import router as incomes_router
 from api.routers.roles import router as roles_router
 from api.routers.admin import router as admin_router
+from api.routers.receipt import router as receipt_router
 from dotenv import load_dotenv
+
+from services.minio import init_minio
 
 load_dotenv()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_minio()
+    yield
 
-
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -34,6 +42,7 @@ app.include_router(expenses_router)
 app.include_router(incomes_router)
 app.include_router(roles_router)
 app.include_router(admin_router)
+app.include_router(receipt_router)
 
 cli = typer.Typer()
 
