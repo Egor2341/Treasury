@@ -6,17 +6,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from data.entities.receipt import Receipt
 from exceptions.NoEntryError import NoEntryError
+from models.receipts.init import Init
 from models.receipts.one import Receipt as ReceiptDto
 from models.receipts.list import ListReceipts
 
+LIMIT = 10
 
-async def get_count(session: AsyncSession, user_uuid: str) -> int:
+
+async def init(session: AsyncSession, user_uuid: str) -> Init:
     stmt = await session.execute(select(Receipt).where(Receipt.user_uuid == user_uuid))
-    return len(stmt.scalars().all())
+    res = stmt.scalars().all()
+    return Init(
+        receipts=[ReceiptDto(uuid=r.uuid, name=r.original_name) for r in res[:LIMIT]],
+        count=len(res)
+    )
 
 
-async def get_receipts(session: AsyncSession, user_uuid: str) -> ListReceipts:
-    stmt = await session.execute(select(Receipt).where(Receipt.user_uuid == user_uuid))
+async def get_receipts(session: AsyncSession, user_uuid: str, page: int) -> ListReceipts:
+    stmt = await session.execute(
+        select(Receipt).where(Receipt.user_uuid == user_uuid).limit(LIMIT).offset(page * LIMIT))
     return ListReceipts(
         receipts=[ReceiptDto(
             uuid=r.uuid,

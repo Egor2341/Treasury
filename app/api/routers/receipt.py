@@ -14,14 +14,24 @@ router = APIRouter(
 )
 
 
+@router.get("/init", status_code=200)
+async def get_init(
+        user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
+        session: AsyncSession = Depends(get_session)
+):
+    return await receipts_repository.init(session, user_uuid)
+
+
 @router.get("", status_code=200)
 async def get_receipts(
+        page: int,
         user_uuid: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
         session: AsyncSession = Depends(get_session)
 ):
     return await receipts_repository.get_receipts(
         session,
-        user_uuid
+        user_uuid,
+        page
     )
 
 
@@ -39,11 +49,11 @@ async def add_receipt(
 
 @router.get("/download")
 async def get_receipt(
-        file_uuid: str,
+        uuid: str,
         _: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
         session: AsyncSession = Depends(get_session)
 ):
-    file = await receipts_repository.get_file_info(session, file_uuid)
+    file = await receipts_repository.get_file_info(session, uuid)
     return {
         "url": download_from_minio_url(file.object_name)
     }
@@ -51,10 +61,10 @@ async def get_receipt(
 
 @router.delete("", status_code=204)
 async def delete_receipt(
-        file_uuid: str,
+        uuid: str,
         _: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))],
         session: AsyncSession = Depends(get_session)
 ):
-    file = await receipts_repository.delete_receipt(session, file_uuid)
+    file = await receipts_repository.delete_receipt(session, uuid)
     await session.commit()
     await delete_from_minio(file)
