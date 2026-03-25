@@ -52,7 +52,7 @@ async def edit_budgets(session: AsyncSession, data: BudgetDto, user_uuid: uuid):
     )
 
     result = await session.execute(query)
-    budget = result.scalar_one_or_none()
+    budget = result.first()
 
     if (budget):
         await session.execute(

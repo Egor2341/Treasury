@@ -15,17 +15,17 @@ router = APIRouter(
 
 
 @router.get("", status_code=200)
-async def get_expenses(
+async def get_incomes(
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session),
         page: int = 0,
-        order_value: bool = True
+        order: bool = True
 ):
     return await incomes_repository.get_incomes(
         session,
         current_user_uuid,
         page,
-        order_value
+        order
     )
 
 
@@ -37,7 +37,7 @@ async def get_categories(
     return await incomes_repository.get_categories(session, user_uuid)
 
 @router.post("", status_code=201)
-async def add_expenses(
+async def add_income(
         data: ItemResponseDto,
         current_user_uuid: str = Depends(get_user_from_token),
         session: AsyncSession = Depends(get_session)

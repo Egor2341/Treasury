@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
+from datetime import datetime
 
-import typer
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers.auth import router as auth_router
@@ -18,10 +18,14 @@ from services.minio import init_minio
 
 load_dotenv()
 
+BASE_URL = "http://localhost:5173"
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_minio()
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
@@ -44,13 +48,36 @@ app.include_router(roles_router)
 app.include_router(admin_router)
 app.include_router(receipt_router)
 
-cli = typer.Typer()
 
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap(request: Request):
+    urls = []
 
-@cli.command()
-def db_init_models():
-    print("Done")
+    routes = ["/welcome"]
+    for route in routes:
+        urls.append(f"""
+        <url>
+            <loc>{BASE_URL}{route}</loc>
+            <lastmod>{datetime.now().date()}</lastmod>
+            <priority>0.8</priority>
+        </url>
+        """)
+    xml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            {''.join(urls)}
+        </urlset>
+        """
 
+    return Response(content=xml_content, media_type="application/xml")
 
-if __name__ == "__main__":
-    cli()
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    content = f"""
+    User-agent: *
+    Allow: /
+
+    Disallow: /admin
+
+    Sitemap: {BASE_URL}/sitemap.xml
+    """
+    return Response(content=content.strip(), media_type="text/plain")
