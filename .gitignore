@@ -1,5 +1,5 @@
 # Environment Variables
-.env
+app/.env
 
 # Python
 __pycache__/
@@ -28,7 +28,7 @@ venv/
 env/
 ENV/
 .venv/
-.env/
+app/.env/
 
 # IDE
 .vscode/

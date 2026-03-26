@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordBearer
+
+from config import settings
 from exceptions.InvalidTokenError import InvalidTokenError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-load_dotenv()
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7

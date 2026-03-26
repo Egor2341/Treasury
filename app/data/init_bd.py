@@ -1,15 +1,13 @@
 import datetime
-import os
 from typing import AsyncIterator
 
-from dotenv import load_dotenv
 from sqlalchemy import MetaData, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
 
-load_dotenv()
+from config import settings
 
-DATABASE_URL = f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@localhost:5432/{os.getenv('DB_NAME')}"
+DATABASE_URL = f"postgresql+asyncpg://{settings.db_user}:{settings.db_password}@localhost:5432/{settings.db_name}"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 

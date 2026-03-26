@@ -7,6 +7,7 @@ from data.init_bd import get_session
 from data.repositories import category_repository
 from models.categories.category import CategoryDto
 from models.categories.edit import EditDto
+from services.alpha_vantage_service import ExchangeService
 from services.security import RoleChecker
 
 router = APIRouter(
@@ -14,6 +15,11 @@ router = APIRouter(
     tags=["categories"]
 )
 
+service = ExchangeService()
+
+@router.get("/rates", status_code=200, response_model=None)
+async def get_rates(_: Annotated[str, Depends(RoleChecker(allowed_roles=["user"]))]):
+    return await service.get_rates()
 
 @router.get("", status_code=200)
 async def get_all_categories(

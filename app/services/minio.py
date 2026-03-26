@@ -8,13 +8,13 @@ import os
 from dotenv import load_dotenv
 from starlette.responses import StreamingResponse
 
-load_dotenv()
+from config import settings
 
 bucket_name = "receipts"
 
 client = Minio("localhost:9000",
-               access_key=os.getenv("MINIO_USER"),
-               secret_key=os.getenv("MINIO_PASSWORD"),
+               access_key=settings.minio_user,
+               secret_key=settings.minio_password,
                secure=False
                )
 
@@ -59,6 +59,7 @@ def download_from_minio_url(filename: str):
         filename,
         expires=timedelta(minutes=5)
     )
+
 
 async def delete_from_minio(filename: str):
     client.remove_object(bucket_name, filename)

@@ -12,11 +12,9 @@ from api.routers.incomes import router as incomes_router
 from api.routers.roles import router as roles_router
 from api.routers.admin import router as admin_router
 from api.routers.receipt import router as receipt_router
-from dotenv import load_dotenv
+from api.routers.alpha_vantage_router import router as a_v_router
 
 from services.minio import init_minio
-
-load_dotenv()
 
 BASE_URL = "http://localhost:5173"
 
@@ -47,6 +45,7 @@ app.include_router(incomes_router)
 app.include_router(roles_router)
 app.include_router(admin_router)
 app.include_router(receipt_router)
+app.include_router(a_v_router)
 
 
 @app.get("/sitemap.xml", include_in_schema=False)
@@ -69,6 +68,7 @@ async def sitemap(request: Request):
         """
 
     return Response(content=xml_content, media_type="application/xml")
+
 
 @app.get("/robots.txt", include_in_schema=False)
 async def robots():
