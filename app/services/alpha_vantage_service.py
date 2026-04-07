@@ -61,7 +61,5 @@ class ExchangeService:
             result[cur] = await self._fetch_rate(cur)
 
         return ExchangeDto(
-            usd=result["USD"],
-            eur=result["EUR"],
-            cny=result["CNY"]
+            rates=result
         )
